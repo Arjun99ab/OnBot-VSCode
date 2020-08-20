@@ -354,20 +354,25 @@ public class ConceptVuforiaNavigation extends TeleopArjun {
                 // express the rotation of the robot in degrees.
                 Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
                 telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-           
+                
+                
                 if(lastTrackable.getName() == "Front Perimeter 1") {
 
-                    if((translation.get(0) / mmPerInch) <= -25) {
+                    if((translation.get(0) / mmPerInch) <= -42) {
                         goSideways(-0.2);
-                    }                 
+                    } else {
+                        goForward(0.12);
+                    } 
                     
                 } else if(lastTrackable.getName() == "Blue Perimeter 2") {
-                    goSideways(0.2);
-                    if((translation.get(0) / mmPerInch) >= 45) {
-                    goForward(0);
+                    
+                    if((translation.get(1) / mmPerInch) <= 56) {
+                        goSideways(0.2);
+                    } else {
+                        goForward(0.12);
                     }
                 } else {
-                    goForward(0);
+                    goForward(0.12);
                 }
             }
             else {
