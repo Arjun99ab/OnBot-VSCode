@@ -82,8 +82,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  * is explained below.
  */
 
-
-@TeleOp(name="VuforiaDemo", group ="Concept")
+@Autonomous(name="VuforiaDemo", group ="Concept")
 
 public class VuforiaDemo extends TeleopArjun {
 
@@ -132,6 +131,7 @@ public class VuforiaDemo extends TeleopArjun {
 
     // Class Members
     private OpenGLMatrix lastLocation = null;
+    private VuforiaTrackable lastTrackable = null; 
     private VuforiaLocalizer vuforia = null;
     private boolean targetVisible = false;
     private float phoneXRotate    = 0;
@@ -141,6 +141,7 @@ public class VuforiaDemo extends TeleopArjun {
     @Override public void runOpMode() {
         my_init();
         /*
+        my
          * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
          * We can pass Vuforia the handle to a camera preview resource (on the RC phone);
          * If no camera monitor is desired, use the parameter-less constructor instead (commented out below).
@@ -313,30 +314,25 @@ public class VuforiaDemo extends TeleopArjun {
         // CONSEQUENTLY do not put any driving commands in this loop.
         // To restore the normal opmode structure, just un-comment the following line:
 
-        // waitForStart();
+        telemetry.addData("Press play :D","");
+        telemetry.update();
+        waitForStart();
 
         // Note: To use the remote camera preview:
         // AFTER you hit Init on the Driver Station, use the "options menu" to select "Camera Stream"
         // Tap the preview window to receive a fresh image.
 
         targetsSkyStone.activate();
+        goForward(0.12);
         while (!isStopRequested()) {
 
             // check all the trackable targets to see which one (if any) is visible.
             targetVisible = false;
-            goForward(0.2);
             for (VuforiaTrackable trackable : allTrackables) {
                 if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
                     telemetry.addData("Visible Target", trackable.getName());
                     targetVisible = true;
-                    if(trackable.getName() == "Front Perimeter 1") {
-                        goSideways(0.2);
-                    } else if(trackable.getName() == "Blue Perimeter 2") {
-                        goSideways(-0.2);
-                    } else {
-                        goForward(0.2);
-                    }
-
+                    lastTrackable = trackable;
                     // getUpdatedRobotLocation() will return null if no new information is available since
                     // the last time that call was made, or if the trackable is not currently visible.
                     OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
@@ -349,6 +345,7 @@ public class VuforiaDemo extends TeleopArjun {
 
             // Provide feedback as to where the robot is located (if we know).
             if (targetVisible) {
+                
                 // express position (translation) of robot in inches.
                 VectorF translation = lastLocation.getTranslation();
                 telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
@@ -357,11 +354,31 @@ public class VuforiaDemo extends TeleopArjun {
                 // express the rotation of the robot in degrees.
                 Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
                 telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+                
+                
+                if(lastTrackable.getName() == "Front Perimeter 1") {
+
+                    if((translation.get(0) / mmPerInch) <= -42) {
+                        goSideways(-0.2);
+                    } else {
+                        goForward(0.12);
+                    } 
+                    
+                } else if(lastTrackable.getName() == "Blue Perimeter 2") {
+                    
+                    if((translation.get(1) / mmPerInch) <= 56) {
+                        goSideways(0.2);
+                    } else {
+                        goForward(0.12);
+                    }
+                } else {
+                    goForward(0.12);
+                }
             }
             else {
                 telemetry.addData("Visible Target", "none");
             }
-            telemetry.update();
+           telemetry.update();
         }
 
         // Disable Tracking when we are done;
