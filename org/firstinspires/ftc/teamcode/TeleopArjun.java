@@ -30,6 +30,15 @@ public class TeleopArjun extends LinearOpMode {
     DcMotor botLeft;
     DcMotor botRight;
     Servo myServo;
+    BNO055IMU myGyro;
+    public double globalAngle;
+    public double correction;
+    public double pow;
+    public long sec;
+    public static final double motorOutputCount = 753.8;
+    public static final double wheelCircumference = 100*Math.PI;
+    public double distance;
+    public double rotationsNeeded;
     /*
     //BNO055IMU imu;
     Orientation lastAngles = new Orientation();
@@ -55,14 +64,7 @@ public class TeleopArjun extends LinearOpMode {
         return globalAngle;
     }
     */
-    public double globalAngle;
-    public double correction;
-    public double pow;
-    public long sec;
-    public static final double motorOutputCount = 753.8;
-    public static final double wheelCircumference = 100*Math.PI;
-    public double distance;
-    public double rotationsNeeded;
+    
     
     public void my_init() {
         // initialize motor variable
@@ -73,6 +75,17 @@ public class TeleopArjun extends LinearOpMode {
         botLeft = hardwareMap.dcMotor.get("topRight");
         botRight = hardwareMap.dcMotor.get("bottomLeft");
         myServo = hardwareMap.servo.get("Servo");
+        myGyro = hardwareMap.get(BNO055IMU.class, "imu");
+
+        BNO055IMU.Parameters imuParameters = new BNO055IMU.Parameters();
+        // Use degrees as angle unit.
+        imuParameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        // Express acceleration as m/s^2.
+        imuParameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        // Disable logging.
+        imuParameters.loggingEnabled = false;
+        // Initialize IMU.
+        myGyro.initialize(imuParameters);
 
         telemetry.addData("Status", "Initialized");
         
@@ -202,7 +215,7 @@ public class TeleopArjun extends LinearOpMode {
     // * Get current cumulative angle rotation from last reset.
     // * @return Angle in degrees. + = left, - = right.
      
-    
+    ______________________________________________________
     public void gyroRotate(int degrees, double power) {
         double  leftPower;
         double rightPower;
